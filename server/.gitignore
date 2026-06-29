@@ -1,0 +1,20 @@
+# Server-side .gitignore
+# Dependency directories
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# Debug and OS files
+npm-debug.log*
+.yarn*
+.DS_Store
+.idea/
+.vscode/
+
+# Production build files (if any)
+/dist/
