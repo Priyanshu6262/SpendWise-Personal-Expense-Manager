@@ -23,12 +23,15 @@ const logger = winston.createLogger({
 
 // Add Loggly transport in production or if Token is provided
 if (process.env.LOGGLY_TOKEN && process.env.LOGGLY_SUBDOMAIN) {
+  console.log('Initializing Loggly transport for subdomain:', process.env.LOGGLY_SUBDOMAIN);
   logger.add(new Loggly({
     token: process.env.LOGGLY_TOKEN,
     subdomain: process.env.LOGGLY_SUBDOMAIN,
     tags: ['mern-expense-manager', isProduction ? 'production' : 'development'],
     json: true
   }));
+} else {
+  console.log('Loggly transport NOT added. Token or Subdomain is missing.');
 }
 
 module.exports = logger;
