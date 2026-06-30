@@ -1,4 +1,5 @@
 const Transaction = require('../models/Transaction');
+const logger = require('../utils/logger');
 
 // @desc    Get all transactions for the logged-in user
 // @route   GET /api/transactions
@@ -30,7 +31,7 @@ const getTransactions = async (req, res) => {
     
     res.json(transactions);
   } catch (error) {
-    console.error('Get Transactions Error:', error.message);
+    logger.error('Get Transactions Error', { error: error.message });
     res.status(500).json({ message: 'Server error retrieving transactions' });
   }
 };
@@ -64,9 +65,18 @@ const createTransaction = async (req, res) => {
       notes,
     });
 
+    logger.info('Transaction created', { 
+      action: 'create_transaction', 
+      userId: req.user._id, 
+      transactionId: transaction._id, 
+      type, 
+      category, 
+      amount 
+    });
+
     res.status(201).json(transaction);
   } catch (error) {
-    console.error('Create Transaction Error:', error.message);
+    logger.error('Create Transaction Error', { error: error.message });
     res.status(500).json({ message: 'Server error creating transaction' });
   }
 };
@@ -107,9 +117,19 @@ const updateTransaction = async (req, res) => {
     }
 
     const updatedTransaction = await transaction.save();
+    
+    logger.info('Transaction updated', { 
+      action: 'update_transaction', 
+      userId: req.user._id, 
+      transactionId: updatedTransaction._id, 
+      type: updatedTransaction.type, 
+      category: updatedTransaction.category, 
+      amount: updatedTransaction.amount 
+    });
+
     res.json(updatedTransaction);
   } catch (error) {
-    console.error('Update Transaction Error:', error.message);
+    logger.error('Update Transaction Error', { error: error.message });
     res.status(500).json({ message: 'Server error updating transaction' });
   }
 };
@@ -133,9 +153,15 @@ const deleteTransaction = async (req, res) => {
     // Remove transaction
     await Transaction.deleteOne({ _id: req.params.id });
 
+    logger.info('Transaction deleted', { 
+      action: 'delete_transaction', 
+      userId: req.user._id, 
+      transactionId: req.params.id 
+    });
+
     res.json({ message: 'Transaction removed' });
   } catch (error) {
-    console.error('Delete Transaction Error:', error.message);
+    logger.error('Delete Transaction Error', { error: error.message });
     res.status(500).json({ message: 'Server error deleting transaction' });
   }
 };

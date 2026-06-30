@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const logger = require('../utils/logger');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -34,6 +35,7 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
+      logger.info('User registered successfully', { action: 'user_register', userId: user._id, email: user.email });
       res.status(201).json({
         _id: user._id,
         name: user.name,
@@ -44,7 +46,7 @@ const registerUser = async (req, res) => {
       res.status(400).json({ message: 'Invalid user data' });
     }
   } catch (error) {
-    console.error('Register Error:', error.message);
+    logger.error('Register Error', { error: error.message });
     res.status(500).json({ message: 'Server error during registration' });
   }
 };
@@ -64,6 +66,7 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      logger.info('User logged in successfully', { action: 'user_login', userId: user._id, email: user.email });
       res.json({
         _id: user._id,
         name: user.name,
@@ -74,7 +77,7 @@ const loginUser = async (req, res) => {
       res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (error) {
-    console.error('Login Error:', error.message);
+    logger.error('Login Error', { error: error.message });
     res.status(500).json({ message: 'Server error during login' });
   }
 };
@@ -96,6 +99,7 @@ const updateProfile = async (req, res) => {
       }
 
       const updatedUser = await user.save();
+      logger.info('User profile updated', { action: 'user_update_profile', userId: updatedUser._id });
 
       res.json({
         _id: updatedUser._id,
@@ -107,7 +111,7 @@ const updateProfile = async (req, res) => {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
-    console.error('Update Profile Error:', error.message);
+    logger.error('Update Profile Error', { error: error.message });
     // Handle duplicate email error
     if (error.code === 11000) {
       return res.status(400).json({ message: 'Email already in use' });
