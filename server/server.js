@@ -5,10 +5,10 @@ const path = require('path');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
-const logger = require('./utils/logger');
-
 // Load environment variables
 dotenv.config();
+
+const logger = require('./utils/logger');
 
 // Connect to Database
 connectDB();
