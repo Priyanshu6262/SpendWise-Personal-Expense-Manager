@@ -132,7 +132,7 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="amount" className="block text-xs font-semibold text-textSecondary uppercase tracking-wider mb-1.5">
-                Amount ($)
+                Amount (₹)
               </label>
               <input
                 type="number"
