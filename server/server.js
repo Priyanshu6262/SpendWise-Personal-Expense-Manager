@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
@@ -27,10 +28,19 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 
-// Root Endpoint for API status checking
-app.get('/', (req, res) => {
-  res.json({ status: 'API is running successfully...' });
-});
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
+  });
+} else {
+  // Root Endpoint for API status checking
+  app.get('/', (req, res) => {
+    res.json({ status: 'API is running successfully...' });
+  });
+}
 
 // Error handling middleware (fallback)
 app.use((err, req, res, next) => {
