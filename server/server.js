@@ -5,6 +5,7 @@ const path = require('path');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
+const logger = require('./utils/logger');
 
 // Load environment variables
 dotenv.config();
@@ -18,9 +19,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Log requests in development
+// Log requests
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.originalUrl}`);
+  logger.info(`${req.method} ${req.originalUrl}`);
   next();
 });
 
@@ -44,7 +45,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // Error handling middleware (fallback)
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error(err.stack || err.message);
   res.status(500).json({
     message: err.message || 'Something went wrong on the server',
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
@@ -54,5 +55,5 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  logger.info(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
