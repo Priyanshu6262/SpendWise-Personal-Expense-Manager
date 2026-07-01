@@ -1,12 +1,15 @@
+// Load environment variables FIRST — before any other require()
+// that might initialize modules (like logger.js) which depend on env vars
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const path = require('path');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
-// Load environment variables
-dotenv.config();
+const webhookRoutes = require('./routes/webhookRoutes');
 
 const logger = require('./utils/logger');
 
@@ -28,6 +31,9 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
+
+// AI Incident Webhook — receives alerts from Loggly/Datadog and triggers Gemini analysis
+app.use('/webhook', webhookRoutes);
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
