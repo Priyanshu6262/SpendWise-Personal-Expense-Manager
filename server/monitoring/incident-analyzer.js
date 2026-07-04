@@ -85,17 +85,11 @@ async function fetchLogsFromLoki(windowMinutes = 15, limit = 30) {
 // ─── Gemini ───────────────────────────────────────────────────────────────────
 
 /**
- * Build a DevOps-focused prompt and call Gemini 1.5 Flash.
- * Returns the raw markdown analysis string.
+ * Build a DevOps-focused prompt and call Gemini 1.5 Flash via REST API.
+ * Supports all key formats (AIzaSy..., AQ.Ab8..., etc.)
  */
 async function analyzeWithGemini(alertName, alertState, labels, logs) {
   if (!GEMINI_API_KEY) return null;
-
-  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
-    generationConfig: { maxOutputTokens: 1024, temperature: 0.3 },
-  });
 
   const logsBlock = logs.length
     ? logs.map((l, i) => `[${i + 1}] ${JSON.stringify(l)}`).join('\n')
@@ -132,16 +126,32 @@ One or two sentences identifying the most likely root cause based on the logs an
 1. <specific shell command or UI step>
 2. <specific shell command or UI step>
 3. <specific shell command or UI step>
-(add up to 2 more if needed)
 
 🛡️ **PREVENTION**
 - <code or config change to prevent recurrence>
 - <monitoring or alerting improvement>
 
-Keep the total response under 600 words. Be specific and technical — reference actual log values, route names, or status codes where visible.`;
+Keep the total response under 600 words. Be specific and technical.`;
 
-  const result = await model.generateContent(prompt);
-  return result.response.text().trim();
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+
+  const response = await axios.post(
+    url,
+    {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: 1024, temperature: 0.3 }
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': GEMINI_API_KEY,
+      },
+      timeout: 15000,
+    }
+  );
+
+  const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  return text ? text.trim() : null;
 }
 
 // ─── Discord ──────────────────────────────────────────────────────────────────
