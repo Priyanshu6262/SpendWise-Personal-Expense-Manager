@@ -133,27 +133,40 @@ One or two sentences identifying the most likely root cause based on the logs an
 
 Keep the total response under 600 words. Be specific and technical.`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+  const modelsToTry = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash-8b',
+    'gemini-1.5-pro'
+  ];
 
-  try {
-    const response = await axios.post(
-      url,
-      {
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 1024, temperature: 0.3 }
-      },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 15000,
-      }
-    );
+  let lastError = null;
 
-    const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    return text ? text.trim() : null;
-  } catch (err) {
-    console.error('[IncidentAnalyzer] Gemini API Error Details:', err.response?.data || err.message);
-    throw new Error(`Gemini API Error (${err.response?.status || 'network'}): ${JSON.stringify(err.response?.data || err.message)}`);
+  for (const modelName of modelsToTry) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+
+    try {
+      const response = await axios.post(
+        url,
+        {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 1024, temperature: 0.3 }
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 15000,
+        }
+      );
+
+      const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text.trim();
+    } catch (err) {
+      lastError = err;
+      console.warn(`[IncidentAnalyzer] Model ${modelName} failed (${err.response?.status || 'net'}):`, err.response?.data?.error?.message || err.message);
+    }
   }
+
+  throw new Error(`Gemini API Error: ${JSON.stringify(lastError?.response?.data || lastError?.message)}`);
 }
 
 // ─── Discord ──────────────────────────────────────────────────────────────────
