@@ -135,23 +135,25 @@ Keep the total response under 600 words. Be specific and technical.`;
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
 
-  const response = await axios.post(
-    url,
-    {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 1024, temperature: 0.3 }
-    },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY,
+  try {
+    const response = await axios.post(
+      url,
+      {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 1024, temperature: 0.3 }
       },
-      timeout: 15000,
-    }
-  );
+      {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 15000,
+      }
+    );
 
-  const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  return text ? text.trim() : null;
+    const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    return text ? text.trim() : null;
+  } catch (err) {
+    console.error('[IncidentAnalyzer] Gemini API Error Details:', err.response?.data || err.message);
+    throw new Error(`Gemini API Error (${err.response?.status || 'network'}): ${JSON.stringify(err.response?.data || err.message)}`);
+  }
 }
 
 // ─── Discord ──────────────────────────────────────────────────────────────────
