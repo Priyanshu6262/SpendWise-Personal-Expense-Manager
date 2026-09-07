@@ -45,7 +45,7 @@ Analyze this error and respond in the following **strict JSON format only** (no 
   "estimatedImpact": "Brief description of who/what is affected."
 }
 
-Be specific to the SpendWise MERN stack context (Node.js/Express backend, MongoDB/Mongoose, React frontend).
+Be specific to the SpendWise PERN/SERN stack context (Node.js/Express backend, SQL/Sequelize, React frontend).
 `.trim();
 
   // Try models in priority order — falls through on quota/404 errors

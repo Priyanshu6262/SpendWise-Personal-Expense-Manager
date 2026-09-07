@@ -1,8 +1,8 @@
 # 💰 SpendWise | Personal Expense Manager
 
-SpendWise is a full-stack **Personal Expense Manager** built with the **MERN Stack** (MongoDB, Express.js, React.js with Vite, and Node.js). It helps users manage their daily finances by tracking income and expenses in one place. The application provides a secure authentication system, an intuitive dashboard, and transaction management features to help users monitor their financial activities efficiently.
+SpendWise is a full-stack **Personal Expense Manager** built with Express.js, React.js with Vite, Node.js, and a relational SQL database managed via Sequelize ORM (supporting SQLite, PostgreSQL, and MySQL). It helps users manage their daily finances by tracking income and expenses in one place. The application provides a secure authentication system, an intuitive dashboard, and transaction management features to help users monitor their financial activities efficiently.
 
-This project was built to practice full-stack web development concepts, including authentication, REST APIs, database management, and responsive UI development.
+This project was built to practice full-stack web development concepts, including authentication, REST APIs, relational database management, and responsive UI development.
 
 ---
 
@@ -42,14 +42,15 @@ This project was built to practice full-stack web development concepts, includin
 
 * Node.js
 * Express.js
+* Sequelize ORM
 * JWT Authentication
 * bcrypt
 * CORS
 
 ## Database
 
-* MongoDB
-* Mongoose
+* Relational SQL (SQLite default for zero-config dev, PostgreSQL / MySQL supported)
+* Sequelize ORM
 
 ---
 
@@ -124,7 +125,12 @@ Create a `.env` file inside the `server` folder.
 ```env
 PORT=5000
 
-MONGO_URI=your_mongodb_connection_string
+# SQL Database Configuration (defaults to SQLite for zero-config local dev)
+DB_DIALECT=sqlite
+DB_STORAGE=./database.sqlite
+
+# Or for PostgreSQL / MySQL:
+# DATABASE_URL=postgres://user:password@localhost:5432/spendwise
 
 JWT_SECRET=your_secret_key
 

@@ -1,80 +1,94 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply bg-bgSecondary text-textPrimary font-sans antialiased;
+    @apply bg-slate-50 text-slate-900 font-sans;
     margin: 0;
+    min-height: 100vh;
   }
 }
 
-/* Custom Google Stitch Card styles */
-.stitch-card {
-  @apply bg-bgPrimary border border-borderLight rounded-stitch shadow-stitch-sm transition-all duration-300;
+/* Common UI Components & Utilities - Static, Clean & Crisp */
+.app-card {
+  @apply bg-white border border-slate-200 rounded-card shadow-card;
 }
 
-.stitch-card:hover {
-  @apply shadow-stitch-md;
+.app-card-hover {
+  @apply bg-white border border-slate-200 rounded-card shadow-card hover:border-slate-300;
+}
+
+.app-input {
+  @apply w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed;
+}
+
+.app-btn-primary {
+  @apply inline-flex items-center justify-center font-medium text-sm px-4 py-2.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.app-btn-secondary {
+  @apply inline-flex items-center justify-center font-medium text-sm px-4 py-2.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.app-btn-danger {
+  @apply inline-flex items-center justify-center font-medium text-sm px-4 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.app-btn-ghost {
+  @apply inline-flex items-center justify-center font-medium text-sm p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:opacity-50 disabled:pointer-events-none;
+}
+
+/* Compatibility utility aliases */
+.stitch-card {
+  @apply bg-white border border-slate-200 rounded-card shadow-card;
 }
 
 .stitch-input {
-  @apply w-full px-4 py-3 rounded-xl border border-borderLight bg-bgPrimary text-textPrimary placeholder-textSecondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200 text-sm;
+  @apply w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed;
 }
 
 .stitch-btn-primary {
-  @apply px-5 py-2.5 bg-primary text-white font-medium rounded-xl hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply inline-flex items-center justify-center font-medium text-sm px-4 py-2.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
 }
 
 .stitch-btn-secondary {
-  @apply px-5 py-2.5 bg-white text-textPrimary font-medium rounded-xl border border-borderLight hover:bg-bgSecondary focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply inline-flex items-center justify-center font-medium text-sm px-4 py-2.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
 }
 
 .stitch-btn-danger {
-  @apply px-5 py-2.5 bg-expense text-white font-medium rounded-xl hover:bg-expense-hover focus:outline-none focus:ring-2 focus:ring-expense focus:ring-offset-2 transition-all duration-200 shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply inline-flex items-center justify-center font-medium text-sm px-4 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
 }
 
-/* Custom scrollbars */
+/* Clean minimal scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-borderLight rounded-full hover:bg-textSecondary/30;
+  background: #cbd5e1;
+  border-radius: 9999px;
 }
 
-/* Animations */
-@keyframes slideIn {
-  from {
-    transform: translateY(1rem);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-in {
-  animation: slideIn 0.3s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out forwards;
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

@@ -7,9 +7,10 @@ const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
 
-const connectDB           = require('./config/db');
+const { connectDB }      = require('./models');
 const authRoutes          = require('./routes/authRoutes');
 const transactionRoutes   = require('./routes/transactionRoutes');
+const aiRoutes            = require('./routes/aiRoutes');
 const webhookRoutes        = require('./routes/webhookRoutes');
 
 const logger        = require('./utils/logger');
@@ -62,7 +63,7 @@ process.on('unhandledRejection', (reason, promise) => {
   // PM2 / systemd will restart the process automatically
 });
 
-// ─── Connect to MongoDB ───────────────────────────────────────────────────────
+// ─── Connect to SQL Database ──────────────────────────────────────────────────
 connectDB();
 
 // ─── Express App Setup ───────────────────────────────────────────────────────
@@ -80,6 +81,7 @@ app.use(requestLogger);
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth',         authRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/ai',           aiRoutes);
 
 // AI Incident Webhook — receives alerts from Loggly/Datadog and triggers Gemini analysis
 app.use('/webhook', webhookRoutes);

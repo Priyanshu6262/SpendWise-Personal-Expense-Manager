@@ -16,42 +16,44 @@ const ConfirmationModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-textPrimary/40 backdrop-blur-sm transition-opacity animate-fade-in"
+        className="fixed inset-0 bg-slate-900/40"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative w-full max-w-md bg-white border border-borderLight rounded-2xl shadow-stitch-lg z-10 overflow-hidden animate-slide-in p-6">
+      <div className="relative w-full max-w-md bg-white border border-slate-200 rounded-card shadow-modal z-10 overflow-hidden p-6">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-textSecondary hover:text-textPrimary transition-colors"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400"
           disabled={loading}
+          aria-label="Close dialog"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {/* Modal Content */}
         <div className="flex gap-4 items-start">
-          <div className="flex-shrink-0 p-3 bg-expense-light rounded-xl text-expense">
-            <AlertTriangle className="w-6 h-6" />
+          <div className="flex-shrink-0 p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-rose-600">
+            <AlertTriangle className="w-5 h-5" />
           </div>
-          <div className="flex-grow">
-            <h3 className="text-base font-semibold text-textPrimary leading-6">
+          <div className="flex-grow pt-0.5">
+            <h3 className="text-base font-semibold text-slate-900 leading-tight">
               {title}
             </h3>
-            <p className="mt-2 text-sm text-textSecondary leading-relaxed">
+            <p className="mt-2 text-sm text-slate-600 leading-normal">
               {message}
             </p>
           </div>
         </div>
 
         {/* Actions Button Panel */}
-        <div className="mt-6 flex items-center justify-end gap-3">
+        <div className="mt-6 flex items-center justify-end gap-2.5">
           <button
             type="button"
             onClick={onClose}
-            className="stitch-btn-secondary"
+            className="app-btn-secondary"
             disabled={loading}
           >
             Cancel
@@ -59,10 +61,10 @@ const ConfirmationModal = ({
           <button
             type="button"
             onClick={onConfirm}
-            className="stitch-btn-danger flex items-center gap-1.5"
+            className="app-btn-danger"
             disabled={loading}
           >
-            {loading ? <Spinner size="sm" color="white" /> : 'Delete'}
+            {loading ? <Spinner size="sm" color="white" text="Deleting..." /> : 'Delete'}
           </button>
         </div>
       </div>

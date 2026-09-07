@@ -1,45 +1,97 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const transactionSchema = new mongoose.Schema(
+const Transaction = sequelize.define(
+  'Transaction',
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
     },
     title: {
-      type: String,
-      required: [true, 'Transaction title is required'],
-      trim: true,
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: 'Transaction title is required' },
+      },
+      set(val) {
+        if (val) {
+          this.setDataValue('title', val.trim());
+        }
+      },
     },
     amount: {
-      type: Number,
-      required: [true, 'Amount is required'],
-      min: [0.01, 'Amount must be greater than 0'],
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      validate: {
+        min: {
+          args: [0.01],
+          msg: 'Amount must be greater than 0',
+        },
+      },
     },
     type: {
-      type: String,
-      required: [true, 'Transaction type is required'],
-      enum: ['Income', 'Expense'],
+      type: DataTypes.ENUM('Income', 'Expense'),
+      allowNull: false,
+      validate: {
+        isIn: {
+          args: [['Income', 'Expense']],
+          msg: 'Transaction type must be Income or Expense',
+        },
+      },
     },
     category: {
-      type: String,
-      required: [true, 'Category is required'],
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: 'Category is required' },
+      },
     },
     date: {
-      type: Date,
-      required: [true, 'Date is required'],
-      default: Date.now,
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     notes: {
-      type: String,
-      trim: true,
+      type: DataTypes.TEXT,
+      allowNull: true,
+      set(val) {
+        if (val !== undefined && val !== null) {
+          this.setDataValue('notes', val.trim());
+        } else {
+          this.setDataValue('notes', null);
+        }
+      },
+    },
+    // Virtual _id for backward compatibility with frontend clients
+    _id: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.id;
+      },
     },
   },
   {
+    tableName: 'transactions',
     timestamps: true,
   }
 );
 
-const Transaction = mongoose.model('Transaction', transactionSchema);
+// Ensure JSON serialization includes _id
+Transaction.prototype.toJSON = function () {
+  const values = { ...this.get() };
+  values._id = values.id;
+  return values;
+};
+
 module.exports = Transaction;

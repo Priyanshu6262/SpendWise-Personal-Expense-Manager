@@ -18,6 +18,12 @@ server/.env
 client/dist/
 dist/
 
+# SQLite database files
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+
 # Logs
 *.log
 npm-debug.log*

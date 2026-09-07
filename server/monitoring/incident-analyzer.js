@@ -99,7 +99,7 @@ async function analyzeWithGemini(alertName, alertState, labels, logs) {
     .map(([k, v]) => `  ${k}: ${v}`)
     .join('\n') || '  (none)';
 
-  const prompt = `You are a senior DevOps/SRE engineer performing real-time incident analysis for **SpendWise**, a production MERN-stack personal expense manager (React + Node.js/Express + MongoDB Atlas) deployed on AWS EC2 Ubuntu.
+  const prompt = `You are a senior DevOps/SRE engineer performing real-time incident analysis for **SpendWise**, a production personal expense manager (React + Node.js/Express + SQL/Sequelize) deployed on AWS EC2 Ubuntu.
 
 ━━━ INCIDENT CONTEXT ━━━
 Alert Name  : ${alertName}

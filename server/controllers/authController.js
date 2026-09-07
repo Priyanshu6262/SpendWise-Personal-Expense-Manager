@@ -20,8 +20,10 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Please enter all fields' });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Check if user exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ where: { email: normalizedEmail } });
 
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
@@ -29,25 +31,26 @@ const registerUser = async (req, res) => {
 
     // Create user
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: normalizedEmail,
       password,
     });
 
     if (user) {
-      logger.info('User registered successfully', { action: 'user_register', userId: user._id, email: user.email });
+      logger.info('User registered successfully', { action: 'user_register', userId: user.id, email: user.email });
       res.status(201).json({
-        _id: user._id,
+        _id: user.id,
+        id: user.id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id),
+        token: generateToken(user.id),
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
     }
   } catch (error) {
     logger.error('Register Error', { error: error.message });
-    res.status(500).json({ message: 'Server error during registration' });
+    res.status(500).json({ message: error.message || 'Server error during registration' });
   }
 };
 
@@ -62,16 +65,19 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Please enter all fields' });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Check for user email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ where: { email: normalizedEmail } });
 
     if (user && (await user.matchPassword(password))) {
-      logger.info('User logged in successfully', { action: 'user_login', userId: user._id, email: user.email });
+      logger.info('User logged in successfully', { action: 'user_login', userId: user.id, email: user.email });
       res.json({
-        _id: user._id,
+        _id: user.id,
+        id: user.id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id),
+        token: generateToken(user.id),
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
@@ -87,33 +93,45 @@ const loginUser = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const userId = req.user.id || req.user._id;
+    const user = await User.findByPk(userId);
 
     if (user) {
-      user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;
+      if (req.body.name) {
+        user.name = req.body.name.trim();
+      }
 
-      // If password update is also provided optionally, we can check here, but prompt specifies Name and Email
+      if (req.body.email) {
+        const newEmail = req.body.email.trim().toLowerCase();
+        if (newEmail !== user.email) {
+          const existingUser = await User.findOne({ where: { email: newEmail } });
+          if (existingUser && existingUser.id !== user.id) {
+            return res.status(400).json({ message: 'Email already in use' });
+          }
+          user.email = newEmail;
+        }
+      }
+
       if (req.body.password) {
         user.password = req.body.password;
       }
 
-      const updatedUser = await user.save();
-      logger.info('User profile updated', { action: 'user_update_profile', userId: updatedUser._id });
+      await user.save();
+      logger.info('User profile updated', { action: 'user_update_profile', userId: user.id });
 
       res.json({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        token: generateToken(updatedUser._id),
+        _id: user.id,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        token: generateToken(user.id),
       });
     } else {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
     logger.error('Update Profile Error', { error: error.message });
-    // Handle duplicate email error
-    if (error.code === 11000) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({ message: 'Email already in use' });
     }
     res.status(500).json({ message: 'Server error during profile update' });

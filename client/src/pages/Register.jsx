@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wallet } from 'lucide-react';
+import { Wallet, User, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import Spinner from '../components/Spinner';
 
@@ -16,6 +16,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
   });
+  const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   // If already authenticated, redirect to dashboard
@@ -26,22 +27,28 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errorMsg) setErrorMsg('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
 
     const { name, email, password, confirmPassword } = formData;
 
     if (!name || !email || !password || !confirmPassword) return;
 
     if (password !== confirmPassword) {
-      showError('Passwords do not match.');
+      const msg = 'Passwords do not match.';
+      setErrorMsg(msg);
+      showError(msg);
       return;
     }
 
     if (password.length < 6) {
-      showError('Password must be at least 6 characters long.');
+      const msg = 'Password must be at least 6 characters long.';
+      setErrorMsg(msg);
+      showError(msg);
       return;
     }
 
@@ -55,98 +62,119 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 bg-bgSecondary">
-      {/* Brand logo header */}
-      <div className="flex items-center gap-2.5 mb-8">
-        <div className="p-2.5 bg-primary/10 rounded-2xl">
-          <Wallet className="w-6 h-6 text-primary" />
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-slate-50 text-slate-900">
+      {/* Brand Header */}
+      <div className="flex items-center gap-2.5 mb-6">
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-600 text-white font-bold shadow-sm">
+          <Wallet className="w-5 h-5" />
         </div>
-        <span className="text-2xl font-bold text-textPrimary tracking-tight">
+        <span className="text-2xl font-bold text-slate-900 tracking-tight">
           SpendWise
         </span>
       </div>
 
       {/* Register Card */}
-      <div className="w-full max-w-md bg-white border border-borderLight rounded-2xl shadow-stitch-lg p-8 animate-slide-in">
-        <h2 className="text-xl font-bold text-textPrimary text-center mb-1">
-          Create an account
-        </h2>
-        <p className="text-sm text-textSecondary text-center mb-8">
-          Get started with managing your expenses today
-        </p>
+      <div className="w-full max-w-md bg-white border border-slate-200 rounded-card shadow-card p-6 sm:p-8">
+        <div className="text-center mb-6">
+          <h1 className="text-xl font-bold text-slate-900">
+            Create an account
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Get started with managing your expenses today
+          </p>
+        </div>
+
+        {errorMsg && (
+          <div className="mb-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-xs font-semibold text-textSecondary uppercase tracking-wider mb-1.5">
+            <label htmlFor="name" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Full Name
             </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="John Doe"
-              className="stitch-input"
-              required
-              disabled={loading}
-            />
+            <div className="relative">
+              <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="John Doe"
+                className="app-input pl-9"
+                required
+                disabled={loading}
+              />
+            </div>
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-xs font-semibold text-textSecondary uppercase tracking-wider mb-1.5">
+            <label htmlFor="email" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Email Address
             </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="john@example.com"
-              className="stitch-input"
-              required
-              disabled={loading}
-            />
+            <div className="relative">
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="john@example.com"
+                className="app-input pl-9"
+                required
+                disabled={loading}
+              />
+            </div>
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-xs font-semibold text-textSecondary uppercase tracking-wider mb-1.5">
+            <label htmlFor="password" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className="stitch-input"
-              required
-              disabled={loading}
-            />
+            <div className="relative">
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="At least 6 characters"
+                className="app-input pl-9"
+                required
+                disabled={loading}
+              />
+            </div>
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-xs font-semibold text-textSecondary uppercase tracking-wider mb-1.5">
+            <label htmlFor="confirmPassword" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Confirm Password
             </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="••••••••"
-              className="stitch-input"
-              required
-              disabled={loading}
-            />
+            <div className="relative">
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Re-enter your password"
+                className="app-input pl-9"
+                required
+                disabled={loading}
+              />
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full stitch-btn-primary py-3 flex items-center justify-center gap-2 mt-2"
+            className="w-full app-btn-primary py-2.5 mt-2"
             disabled={
               loading ||
               !formData.name ||
@@ -155,15 +183,15 @@ const Register = () => {
               !formData.confirmPassword
             }
           >
-            {loading ? <Spinner size="sm" color="white" /> : 'Register'}
+            {loading ? <Spinner size="sm" color="white" text="Creating account..." /> : 'Create Account'}
           </button>
         </form>
 
-        <div className="border-t border-borderLight mt-6 pt-5 text-center text-sm">
-          <span className="text-textSecondary">Already have an account? </span>
+        <div className="border-t border-slate-100 mt-6 pt-5 text-center text-xs sm:text-sm text-slate-500">
+          <span>Already have an account? </span>
           <Link
             to="/login"
-            className="text-secondary font-medium hover:underline transition-all"
+            className="text-emerald-700 font-semibold hover:underline"
           >
             Sign in
           </Link>

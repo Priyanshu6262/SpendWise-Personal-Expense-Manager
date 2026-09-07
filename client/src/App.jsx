@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
+import SpendingInsights from './pages/SpendingInsights';
 import Profile from './pages/Profile';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/transactions" element={<Transactions />} />
+                <Route path="/insights" element={<SpendingInsights />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
 

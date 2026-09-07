@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wallet, LayoutDashboard, ReceiptText, User as UserIcon, LogOut } from 'lucide-react';
+import { Wallet, LayoutDashboard, ReceiptText, Sparkles, User as UserIcon, LogOut } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -13,119 +13,120 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (path === '/' && location.pathname === '/') return true;
+    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    return false;
+  };
+
+  const navLinks = [
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Transactions', path: '/transactions', icon: ReceiptText },
+    { name: 'Spending Insights', path: '/insights', icon: Sparkles },
+    { name: 'Profile', path: '/profile', icon: UserIcon },
+  ];
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white border-b border-borderLight shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 w-full bg-white border-b border-slate-200">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-              <Wallet className="w-5 h-5 text-primary" />
+          {/* Logo & Brand */}
+          <Link to="/" className="flex items-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-lg p-1">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-600 text-white font-bold">
+              <Wallet className="w-5 h-5" />
             </div>
-            <span className="text-lg font-bold text-textPrimary tracking-tight">
+            <span className="text-lg font-bold text-slate-900 tracking-tight">
               SpendWise
             </span>
           </Link>
 
-          {/* Nav Links (Desktop) */}
+          {/* Desktop Navigation Links */}
           {user && (
-            <nav className="hidden md:flex items-center gap-1.5">
-              <Link
-                to="/"
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  isActive('/')
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-textSecondary hover:bg-bgSecondary hover:text-textPrimary'
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Dashboard
-              </Link>
-              <Link
-                to="/transactions"
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  isActive('/transactions')
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-textSecondary hover:bg-bgSecondary hover:text-textPrimary'
-                }`}
-              >
-                <ReceiptText className="w-4 h-4" />
-                Transactions
-              </Link>
-              <Link
-                to="/profile"
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  isActive('/profile')
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-textSecondary hover:bg-bgSecondary hover:text-textPrimary'
-                }`}
-              >
-                <UserIcon className="w-4 h-4" />
-                Profile
-              </Link>
+            <nav className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const active = isActive(link.path);
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                      active
+                        ? 'bg-emerald-50 text-emerald-800 font-semibold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${active ? 'text-emerald-700' : 'text-slate-500'}`} />
+                    {link.name}
+                  </Link>
+                );
+              })}
             </nav>
           )}
 
-          {/* User Profile / Logout */}
-          <div className="flex items-center gap-4">
+          {/* User Profile / Logout Section */}
+          <div className="flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
-                <span className="hidden sm:inline-block text-sm font-medium text-textPrimary bg-bgSecondary px-3.5 py-1.5 rounded-full border border-borderLight">
-                  {user.name}
-                </span>
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  title="View Profile"
+                >
+                  <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold uppercase">
+                    {user.name ? user.name.charAt(0) : 'U'}
+                  </span>
+                  <span className="hidden sm:inline-block max-w-[120px] truncate">{user.name}</span>
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center justify-center p-2 rounded-xl border border-borderLight text-textSecondary hover:text-expense hover:bg-expense-light transition-all duration-200"
-                  title="Logout"
+                  className="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  title="Sign out"
+                  aria-label="Sign out"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <div className="flex gap-2">
-                <Link to="/login" className="px-4 py-2 text-sm font-medium text-textPrimary hover:text-primary transition-colors">
-                  Login
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="px-3.5 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  Sign In
                 </Link>
-                <Link to="/register" className="stitch-btn-primary">
-                  Register
+                <Link
+                  to="/register"
+                  className="app-btn-primary text-xs"
+                >
+                  Create Account
                 </Link>
               </div>
             )}
           </div>
         </div>
 
-        {/* Mobile Navigation Bar */}
+        {/* Mobile Navigation Tabs */}
         {user && (
-          <div className="md:hidden flex justify-around border-t border-borderLight/50 py-2">
-            <Link
-              to="/"
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                isActive('/') ? 'text-primary' : 'text-textSecondary'
-              }`}
-            >
-              <LayoutDashboard className="w-5 h-5" />
-              <span>Dashboard</span>
-            </Link>
-            <Link
-              to="/transactions"
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                isActive('/transactions') ? 'text-primary' : 'text-textSecondary'
-              }`}
-            >
-              <ReceiptText className="w-5 h-5" />
-              <span>Transactions</span>
-            </Link>
-            <Link
-              to="/profile"
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                isActive('/profile') ? 'text-primary' : 'text-textSecondary'
-              }`}
-            >
-              <UserIcon className="w-5 h-5" />
-              <span>Profile</span>
-            </Link>
+          <div className="md:hidden flex items-center justify-around border-t border-slate-100 py-1.5">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const active = isActive(link.path);
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`flex flex-col items-center gap-1 py-1.5 px-4 rounded-md text-xs font-medium focus:outline-none ${
+                    active
+                      ? 'text-emerald-700 font-semibold'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{link.name}</span>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

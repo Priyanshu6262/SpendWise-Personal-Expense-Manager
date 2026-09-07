@@ -8,41 +8,50 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#10B981", // Emerald Green
-          hover: "#059669",
-          light: "#E6F4EA",
-        },
-        secondary: {
-          DEFAULT: "#3B82F6", // Blue
-          hover: "#2563EB",
-          light: "#EBF5FF",
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+          DEFAULT: '#059669',
+          hover: '#047857',
+          light: '#ecfdf5',
         },
         expense: {
-          DEFAULT: "#EF4444", // Red
-          hover: "#DC2626",
-          light: "#FEE2E2",
+          50: '#fef2f2',
+          100: '#fee2e2',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          DEFAULT: '#dc2626',
+          hover: '#b91c1c',
+          light: '#fef2f2',
         },
         income: {
-          DEFAULT: "#22C55E", // Green
-          hover: "#16A34A",
-          light: "#DCFCE7",
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+          DEFAULT: '#16a34a',
+          hover: '#15803d',
+          light: '#f0fdf4',
         },
-        textPrimary: "#1F2937",
-        textSecondary: "#6B7280",
-        borderLight: "#E5E7EB",
-        bgPrimary: "#FFFFFF",
-        bgSecondary: "#F8FAFC",
+        borderLight: '#e2e8f0',
+        bgPrimary: '#ffffff',
+        bgSecondary: '#f8fafc',
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       boxShadow: {
-        'stitch-sm': '0 2px 8px rgba(0, 0, 0, 0.04)',
-        'stitch-md': '0 4px 16px rgba(0, 0, 0, 0.06)',
-        'stitch-lg': '0 8px 24px rgba(0, 0, 0, 0.08)',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+        'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
       },
       borderRadius: {
-        'stitch': '16px',
+        'card': '12px',
       }
     },
   },
