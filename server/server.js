@@ -76,13 +76,18 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://spend-wise-personal-expense-manager-three.vercel.app',
-  process.env.CLIENT_URL,          // fallback: set extra allowed origin via Render env var
+  'https://spend-wise-personal-expense-manager.vercel.app',
+  process.env.CLIENT_URL,
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (Postman, curl, mobile apps)
     if (!origin) return callback(null, true);
+    // Allow any vercel.app preview deployment for this project
+    if (origin.match(/^https:\/\/spend-wise-personal-expense-manager.*\.vercel\.app$/)) {
+      return callback(null, true);
+    }
     if (allowedOrigins.some(o => origin.startsWith(o))) return callback(null, true);
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
