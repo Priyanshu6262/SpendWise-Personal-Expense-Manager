@@ -70,7 +70,23 @@ connectDB();
 const app = express();
 
 // Standard middleware
-app.use(cors());
+// ─── CORS ────────────────────────────────────────────────────────────────────
+// Allow requests from the Vercel frontend and localhost in development
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL,          // set this in Render env vars once you have the Vercel URL
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (Postman, curl, mobile apps)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.some(o => origin.startsWith(o))) return callback(null, true);
+    callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 
 // HTTP Request Logger — logs every request/response with method, url, status,
@@ -86,19 +102,12 @@ app.use('/api/ai',           aiRoutes);
 // AI Incident Webhook — receives alerts from Loggly/Datadog and triggers Gemini analysis
 app.use('/webhook', webhookRoutes);
 
-// ─── Static Assets (Production) ──────────────────────────────────────────────
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
-
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client', 'dist', 'index.html'));
-  });
-} else {
-  // Root endpoint for API health checks in development
-  app.get('/', (req, res) => {
-    res.json({ status: 'API is running successfully...' });
-  });
-}
+// ─── Health Check ────────────────────────────────────────────────────────────
+// Frontend is deployed separately on Vercel — this server only serves the API.
+// A simple health check endpoint is provided for uptime monitors.
+app.get('/', (req, res) => {
+  res.json({ status: 'SpendWise API is running ✅', env: process.env.NODE_ENV });
+});
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 // This middleware catches errors passed via next(err) from any route or middleware.
