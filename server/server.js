@@ -75,7 +75,8 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  process.env.CLIENT_URL,          // set this in Render env vars once you have the Vercel URL
+  'https://spend-wise-personal-expense-manager-three.vercel.app',
+  process.env.CLIENT_URL,          // fallback: set extra allowed origin via Render env var
 ].filter(Boolean);
 
 app.use(cors({
