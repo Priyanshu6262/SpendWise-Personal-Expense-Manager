@@ -84,8 +84,12 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (Postman, curl, mobile apps)
     if (!origin) return callback(null, true);
-    // Allow any vercel.app preview deployment for this project
-    if (origin.match(/^https:\/\/spend-wise-personal-expense-manager.*\.vercel\.app$/)) {
+    // Allow any vercel.app preview deployment for this project (spend-wise-* or spendwise-*)
+    if (origin.match(/^https:\/\/(spend-wise|spendwise)-personal-expense-manager.*\.vercel\.app$/)) {
+      return callback(null, true);
+    }
+    // Allow any custom CLIENT_URL pattern set via environment variable
+    if (process.env.CLIENT_URL && origin.startsWith(process.env.CLIENT_URL)) {
       return callback(null, true);
     }
     if (allowedOrigins.some(o => origin.startsWith(o))) return callback(null, true);

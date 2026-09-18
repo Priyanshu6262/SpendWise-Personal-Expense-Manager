@@ -10,10 +10,10 @@ const AppLayout = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
-        <div className="text-center p-6 bg-white border border-slate-200 rounded-card shadow-card">
+      <div className="flex h-screen items-center justify-center bg-[#0B1220]">
+        <div className="text-center p-6 bg-[#111C2E] border border-[#263449] rounded-card shadow-card">
           <Spinner size="md" text="Authenticating..." />
-          <p className="mt-2 text-xs text-slate-500 font-medium">Please wait a moment</p>
+          <p className="mt-2 text-xs text-[#94A3B8] font-medium">Please wait a moment</p>
         </div>
       </div>
     );
@@ -24,9 +24,9 @@ const AppLayout = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 relative">
+    <div className="min-h-screen flex flex-col bg-[#0B1220] text-[#F8FAFC] relative">
       <Navbar />
-      <main className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-20 sm:pb-8">
+      <main className="flex-grow w-full px-[100px] py-6 sm:py-8 pb-20 sm:pb-8">
         <Outlet />
       </main>
       <FloatingChatbot />

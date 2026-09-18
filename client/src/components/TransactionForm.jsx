@@ -26,8 +26,12 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
         title: transaction.title || '',
         amount: transaction.amount || '',
         type: transaction.type || 'Expense',
-        category: transaction.category || (transaction.type === 'Income' ? INCOME_CATEGORIES[0] : EXPENSE_CATEGORIES[0]),
-        date: transaction.date ? new Date(transaction.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        category:
+          transaction.category ||
+          (transaction.type === 'Income' ? INCOME_CATEGORIES[0] : EXPENSE_CATEGORIES[0]),
+        date: transaction.date
+          ? new Date(transaction.date).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0],
         notes: transaction.notes || '',
       });
     } else {
@@ -88,26 +92,28 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40"
+        className="fixed inset-0 bg-[#0B1220]/80 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Form Container Card */}
-      <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-card shadow-modal z-10 overflow-hidden p-6 sm:p-7">
+      <div className="relative w-full max-w-lg bg-[#111C2E] border border-[#263449] rounded-xl shadow-2xl z-10 overflow-hidden p-6 sm:p-7">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+        <div className="flex items-center justify-between border-b border-[#263449] pb-4 mb-5">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-[#F8FAFC]">
               {transaction ? 'Edit Transaction' : 'Add Transaction'}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {transaction ? 'Update the details for this transaction record.' : 'Enter transaction details to track in your account.'}
+            <p className="text-xs text-[#94A3B8] mt-0.5">
+              {transaction
+                ? 'Update the details for this transaction record.'
+                : 'Enter transaction details to track in your account.'}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-400"
+            className="text-[#94A3B8] hover:text-[#F8FAFC] p-1.5 rounded-lg hover:bg-[#0F172A] border border-transparent hover:border-[#263449] transition-all focus:outline-none focus:ring-2 focus:ring-[#10B981]"
             disabled={loading}
             aria-label="Close modal"
           >
@@ -119,17 +125,17 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Transaction Type Segmented Toggle */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-1.5">
               Type
             </label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg border border-slate-200">
+            <div className="grid grid-cols-2 gap-2 p-1 bg-[#0F172A] rounded-lg border border-[#263449]">
               <button
                 type="button"
                 onClick={() => handleTypeSelect('Expense')}
-                className={`py-2 text-xs font-bold rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 ${
+                className={`py-2 text-xs font-bold rounded-md transition-all focus:outline-none ${
                   formData.type === 'Expense'
-                    ? 'bg-rose-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-[#EF4444] text-white shadow-md shadow-[#EF4444]/20'
+                    : 'text-[#94A3B8] hover:text-[#F8FAFC]'
                 }`}
               >
                 Expense
@@ -137,10 +143,10 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
               <button
                 type="button"
                 onClick={() => handleTypeSelect('Income')}
-                className={`py-2 text-xs font-bold rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                className={`py-2 text-xs font-bold rounded-md transition-all focus:outline-none ${
                   formData.type === 'Income'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-[#10B981] text-white shadow-md shadow-[#10B981]/20'
+                    : 'text-[#94A3B8] hover:text-[#F8FAFC]'
                 }`}
               >
                 Income
@@ -150,8 +156,11 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
 
           {/* Title Field */}
           <div>
-            <label htmlFor="title" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Title <span className="text-rose-500">*</span>
+            <label
+              htmlFor="title"
+              className="block text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-1.5"
+            >
+              Title <span className="text-[#EF4444]">*</span>
             </label>
             <input
               type="text"
@@ -160,7 +169,7 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g., Grocery Shopping, Monthly Salary"
-              className="app-input"
+              className="w-full px-3.5 py-2.5 bg-[#0F172A] border border-[#263449] rounded-lg text-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50"
               required
               disabled={loading}
             />
@@ -169,11 +178,14 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
           {/* Amount and Category Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="amount" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                Amount (₹) <span className="text-rose-500">*</span>
+              <label
+                htmlFor="amount"
+                className="block text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-1.5"
+              >
+                Amount (₹) <span className="text-[#EF4444]">*</span>
               </label>
               <div className="relative">
-                <IndianRupee className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <IndianRupee className="w-4 h-4 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="number"
                   step="0.01"
@@ -183,7 +195,7 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
                   value={formData.amount}
                   onChange={handleChange}
                   placeholder="0.00"
-                  className="app-input pl-9"
+                  className="w-full pl-9 pr-3.5 py-2.5 bg-[#0F172A] border border-[#263449] rounded-lg text-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50"
                   required
                   disabled={loading}
                 />
@@ -191,20 +203,23 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
             </div>
 
             <div>
-              <label htmlFor="category" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                Category <span className="text-rose-500">*</span>
+              <label
+                htmlFor="category"
+                className="block text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-1.5"
+              >
+                Category <span className="text-[#EF4444]">*</span>
               </label>
               <select
                 id="category"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="app-input"
+                className="w-full px-3.5 py-2.5 bg-[#0F172A] border border-[#263449] rounded-lg text-sm text-[#F8FAFC] focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50"
                 required
                 disabled={loading}
               >
                 {categories.map((cat) => (
-                  <option key={cat} value={cat}>
+                  <option key={cat} value={cat} className="bg-[#0F172A] text-[#F8FAFC]">
                     {cat}
                   </option>
                 ))}
@@ -214,8 +229,11 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
 
           {/* Date Field */}
           <div>
-            <label htmlFor="date" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Date <span className="text-rose-500">*</span>
+            <label
+              htmlFor="date"
+              className="block text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-1.5"
+            >
+              Date <span className="text-[#EF4444]">*</span>
             </label>
             <input
               type="date"
@@ -223,7 +241,7 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
               name="date"
               value={formData.date}
               onChange={handleChange}
-              className="app-input"
+              className="w-full px-3.5 py-2.5 bg-[#0F172A] border border-[#263449] rounded-lg text-sm text-[#F8FAFC] focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all disabled:opacity-50 [color-scheme:dark]"
               required
               disabled={loading}
             />
@@ -231,8 +249,11 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
 
           {/* Notes Field */}
           <div>
-            <label htmlFor="notes" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Notes <span className="text-slate-400 lowercase font-normal">(optional)</span>
+            <label
+              htmlFor="notes"
+              className="block text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-1.5"
+            >
+              Notes <span className="text-[#64748B] lowercase font-normal">(optional)</span>
             </label>
             <textarea
               id="notes"
@@ -241,24 +262,24 @@ const TransactionForm = ({ isOpen, onClose, transaction = null }) => {
               onChange={handleChange}
               placeholder="Additional details or reference notes..."
               rows="3"
-              className="app-input resize-none"
+              className="w-full px-3.5 py-2.5 bg-[#0F172A] border border-[#263449] rounded-lg text-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all resize-none disabled:opacity-50"
               disabled={loading}
             />
           </div>
 
           {/* Footer Actions */}
-          <div className="border-t border-slate-100 pt-4 mt-6 flex items-center justify-end gap-2.5">
+          <div className="border-t border-[#263449] pt-4 mt-6 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="app-btn-secondary"
+              className="px-4 py-2 text-xs font-semibold text-[#94A3B8] hover:text-[#F8FAFC] bg-[#0F172A] border border-[#263449] rounded-lg hover:bg-[#111C2E] transition-all"
               disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="app-btn-primary"
+              className="px-4 py-2 text-xs font-semibold text-white bg-[#10B981] hover:bg-[#059669] rounded-lg shadow-md shadow-[#10B981]/20 transition-all focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:ring-offset-2 focus:ring-offset-[#111C2E] disabled:opacity-50"
               disabled={loading || !formData.title || !formData.amount}
             >
               {loading ? (

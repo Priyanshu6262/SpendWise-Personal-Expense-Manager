@@ -8,8 +8,7 @@ import { TransactionProvider } from './context/TransactionContext';
 import AppLayout from './layouts/AppLayout';
 
 // Pages
-import Login from './pages/Login';
-import Register from './pages/Register';
+import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import SpendingInsights from './pages/SpendingInsights';
@@ -22,13 +21,14 @@ function App() {
         <TransactionProvider>
           <Router>
             <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              {/* Public Landing & Auth Routes */}
+              <Route path="/" element={<LandingPage initialAuthMode="login" />} />
+              <Route path="/login" element={<LandingPage initialAuthMode="login" />} />
+              <Route path="/register" element={<LandingPage initialAuthMode="register" />} />
 
               {/* Protected Routes Wrapper */}
               <Route element={<AppLayout />}>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/transactions" element={<Transactions />} />
                 <Route path="/insights" element={<SpendingInsights />} />
                 <Route path="/profile" element={<Profile />} />

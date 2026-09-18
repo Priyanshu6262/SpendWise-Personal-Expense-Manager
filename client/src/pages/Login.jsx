@@ -36,12 +36,12 @@ const Login = () => {
     setLoading(false);
 
     if (success) {
-      navigate('/');
+      navigate('/dashboard');
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col justify-center items-center px-[100px] py-12 bg-white text-[#0F172A]">
       {/* Brand Header */}
       <div className="flex items-center gap-2.5 mb-6">
         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-600 text-white font-bold shadow-sm">
