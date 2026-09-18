@@ -21,6 +21,7 @@ import TransactionForm from '../components/TransactionForm';
 import ConfirmationModal from '../components/ConfirmationModal';
 import Spinner from '../components/Spinner';
 import DashboardCharts from '../components/dashboard/DashboardCharts';
+import BudgetRecommendations from '../components/dashboard/BudgetRecommendations';
 
 const Dashboard = () => {
   const { transactions, loading, fetchTransactions, deleteTransaction } = useTransactions();
@@ -393,6 +394,9 @@ const Dashboard = () => {
 
       {/* Visual Analytics & Charts Section */}
       <DashboardCharts transactions={transactions} />
+
+      {/* AI Budget Recommendations Section */}
+      <BudgetRecommendations />
 
       {/* Transaction Add/Edit Modal */}
       <TransactionForm

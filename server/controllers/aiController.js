@@ -1,7 +1,42 @@
 const { Op } = require('sequelize');
+const http = require('http');
 const Transaction = require('../models/Transaction');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const logger = require('../utils/logger');
+
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://127.0.0.1:5001';
+
+/**
+ * Helper to POST JSON to the Python AI microservice with a timeout.
+ */
+async function callPythonService(endpoint, body, timeoutMs = 5000) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(body);
+    const options = {
+      hostname: '127.0.0.1',
+      port: 5001,
+      path: endpoint,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload),
+      },
+      timeout: timeoutMs,
+    };
+    const req = http.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch (e) { reject(new Error('Invalid JSON from Python service')); }
+      });
+    });
+    req.on('timeout', () => { req.destroy(); reject(new Error('Python service timeout')); });
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
 
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
@@ -383,8 +418,144 @@ const evaluatePurchase = async (req, res) => {
   }
 };
 
+/**
+ * @desc    AI Budget Recommendations (Python rule engine + Gemini LLM explanation)
+ * @route   POST /api/ai/budget
+ * @access  Private
+ */
+const getBudgetRecommendations = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+
+    // Fetch all user transactions securely from DB — LLM never touches the DB
+    const transactions = await Transaction.findAll({
+      where: { userId },
+      order: [['date', 'DESC']],
+    });
+
+    const txPayload = transactions.map((t) => ({
+      id: t.id,
+      title: t.title,
+      amount: parseFloat(t.amount),
+      type: t.type,
+      category: t.category,
+      date: t.date,
+    }));
+
+    // ── Step 1: Call Python calculation engine ────────────────────────────
+    let pythonResult = null;
+    try {
+      pythonResult = await callPythonService('/budget', { transactions: txPayload });
+    } catch (pyErr) {
+      logger.warn('[BudgetAI] Python service unreachable, using fallback', { error: pyErr.message });
+    }
+
+    // ── Step 2: Graceful fallback if Python is down ──────────────────────
+    if (!pythonResult || pythonResult.status === 'empty') {
+      const expenses = transactions.filter((t) => t.type === 'Expense');
+      if (expenses.length === 0) {
+        return res.json({
+          status: 'empty',
+          message: 'Add at least 1 month of expenses to get personalized budget recommendations.',
+          category_recommendations: [],
+          summary: {},
+          llm_explanation: null,
+        });
+      }
+
+      // Basic JS fallback: category averages
+      const catMap = {};
+      expenses.forEach((t) => {
+        catMap[t.category] = (catMap[t.category] || 0) + parseFloat(t.amount);
+      });
+
+      const totalMonths = 1;
+      const totalIncome = transactions
+        .filter((t) => t.type === 'Income')
+        .reduce((s, t) => s + parseFloat(t.amount), 0);
+
+      pythonResult = {
+        status: 'fallback',
+        summary: {
+          avg_monthly_income: totalIncome,
+          avg_monthly_expense: Object.values(catMap).reduce((a, b) => a + b, 0),
+        },
+        category_recommendations: Object.entries(catMap).map(([cat, amt]) => ({
+          category: cat,
+          avg_monthly_spend: Math.round(amt),
+          recommended_budget: Math.round(amt * 0.9 / 100) * 100,
+          current_month_spend: Math.round(amt),
+          status: 'on_track',
+          trend_pct: 0,
+        })),
+        raw_insights: Object.entries(catMap).map(
+          ([cat, amt]) =>
+            `${cat}: Based on your spending, consider setting a budget of \u20B9${Math.round(amt * 0.9).toLocaleString('en-IN')}.`
+        ),
+      };
+    }
+
+    // ── Step 3: LLM Enrichment — Gemini explains the raw Python output ────
+    let llmExplanation = null;
+    if (pythonResult.category_recommendations?.length > 0) {
+      const summaryText = pythonResult.summary
+        ? `Monthly Income: \u20B9${pythonResult.summary.avg_monthly_income?.toLocaleString('en-IN') || 0}, ` +
+          `Monthly Expenses: \u20B9${pythonResult.summary.avg_monthly_expense?.toLocaleString('en-IN') || 0}, ` +
+          `Current Savings: \u20B9${pythonResult.summary.current_savings?.toLocaleString('en-IN') || 0} ` +
+          `(${pythonResult.summary.savings_pct || 0}% of income)`
+        : '';
+
+      const topRecs = pythonResult.category_recommendations
+        .slice(0, 6)
+        .map((r) => `${r.category}: spend \u20B9${r.avg_monthly_spend?.toLocaleString('en-IN')} avg → recommend \u20B9${r.recommended_budget?.toLocaleString('en-IN')} (${r.status})`)
+        .join('\n');
+
+      const prompt = `
+You are SpendWise AI, a friendly and practical personal finance advisor for Indian users.
+A Python financial engine has already computed the following budget analysis — your job is to explain it in warm, natural language.
+
+User Financial Profile:
+${summaryText}
+
+Category Budget Recommendations (calculated by our system):
+${topRecs}
+
+Key Rule-Based Insights from the engine:
+${pythonResult.raw_insights?.slice(0, 5).join('\n') || 'No specific insights generated.'}
+
+Your task: Write a concise, friendly budget advice summary (3-5 sentences). 
+- Mention 2-3 specific categories with their recommended budget in \u20B9.
+- Use language like "Based on your recent spending, consider setting a Food budget of \u20B94,000."
+- If savings are low, gently recommend improving it.
+- Do NOT use markdown headers or bullet points. Write in flowing paragraph form.
+- Keep it under 120 words.
+`.trim();
+
+      try {
+        llmExplanation = await callGemini(prompt);
+      } catch (llmErr) {
+        logger.warn('[BudgetAI] LLM call failed', { error: llmErr.message });
+      }
+
+      // Deterministic fallback if Gemini is unavailable
+      if (!llmExplanation && pythonResult.raw_insights?.length > 0) {
+        llmExplanation = pythonResult.raw_insights.slice(0, 3).join(' ');
+      }
+    }
+
+    return res.json({
+      ...pythonResult,
+      llm_explanation: llmExplanation,
+    });
+  } catch (error) {
+    logger.error('Error generating budget recommendations', { error: error.message });
+    res.status(500).json({ message: 'Failed to generate budget recommendations' });
+  }
+};
+
 module.exports = {
   getSpendingAnalytics,
   chatAssistant,
   evaluatePurchase,
+  getBudgetRecommendations,
 };
