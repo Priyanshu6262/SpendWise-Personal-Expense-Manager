@@ -220,20 +220,7 @@ const BudgetRecommendations = () => {
         </button>
       </div>
 
-      {/* LLM Explanation Card */}
-      {llm_explanation && (
-        <div className="bg-[#111C2E] border border-[#6366F1]/30 rounded-xl p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-[#6366F1]/15 border border-[#6366F1]/30 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-[#6366F1]" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-[#6366F1] mb-1 uppercase tracking-wider">AI Financial Advisor</p>
-              <p className="text-sm text-[#F8FAFC] leading-relaxed">{llm_explanation}</p>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Summary Row */}
       {summary && (
