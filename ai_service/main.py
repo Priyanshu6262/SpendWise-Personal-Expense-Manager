@@ -14,6 +14,7 @@ import os
 
 from ai_service.analyzer import analyze_spending_trends
 from ai_service.budget_engine import calculate_budget_recommendations
+from ai_service.report_engine import generate_weekly_report, generate_monthly_report
 
 app = FastAPI(
     title="SpendWise AI Analytics Service",
@@ -65,6 +66,32 @@ def budget(payload: AnalyzeRequest):
         return calculate_budget_recommendations(payload.transactions)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Budget calculation failed: {str(e)}")
+
+
+@app.post("/report/weekly")
+def report_weekly(payload: AnalyzeRequest):
+    """
+    Weekly financial report: current week vs. previous week.
+    Returns verified stats, category comparisons, and daily trend data
+    for LLM natural-language summarization.
+    """
+    try:
+        return generate_weekly_report(payload.transactions)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Weekly report failed: {str(e)}")
+
+
+@app.post("/report/monthly")
+def report_monthly(payload: AnalyzeRequest):
+    """
+    Monthly financial report: current month vs. previous month.
+    Returns verified stats, category comparisons, daily trends,
+    and month-end projection for LLM summarization.
+    """
+    try:
+        return generate_monthly_report(payload.transactions)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Monthly report failed: {str(e)}")
 
 
 if __name__ == "__main__":

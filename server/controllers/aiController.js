@@ -553,9 +553,118 @@ Your task: Write a concise, friendly budget advice summary (3-5 sentences).
   }
 };
 
+/**
+ * @desc    Automatic Financial Report (Weekly or Monthly) — Python engine + LLM summary
+ * @route   POST /api/ai/report
+ * @access  Private
+ * @body    { period: 'weekly' | 'monthly' }
+ */
+const getFinancialReport = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const period = req.body?.period === 'weekly' ? 'weekly' : 'monthly';
+
+    // ── Fetch user's transactions (LLM never touches the DB) ──────────────
+    const transactions = await Transaction.findAll({
+      where: { userId },
+      order: [['date', 'DESC']],
+    });
+
+    const txPayload = transactions.map((t) => ({
+      id: t.id,
+      title: t.title,
+      amount: parseFloat(t.amount),
+      type: t.type,
+      category: t.category,
+      date: t.date,
+    }));
+
+    // ── Step 1: Python engine computes verified analytics ─────────────────
+    const pyEndpoint = period === 'weekly' ? '/report/weekly' : '/report/monthly';
+    let pythonReport = null;
+    try {
+      pythonReport = await callPythonService(pyEndpoint, { transactions: txPayload }, 6000);
+    } catch (pyErr) {
+      logger.warn('[FinancialReport] Python service unreachable', { error: pyErr.message });
+    }
+
+    if (!pythonReport || pythonReport.status === 'empty') {
+      return res.json({
+        status: 'empty',
+        period,
+        message: `Not enough ${period === 'weekly' ? 'this week\'s' : 'this month\'s'} transactions to generate a report. Start logging to unlock AI financial reports.`,
+        llm_summary: null,
+      });
+    }
+
+    // ── Step 2: Build structured LLM prompt from Python-verified numbers ──
+    const ctx = pythonReport.llm_context || {};
+    const catChanges = (pythonReport.category_comparison || [])
+      .slice(0, 4)
+      .map((c) => {
+        const dir = c.direction === 'up' ? 'increased' : c.direction === 'down' ? 'decreased' : 'stayed stable';
+        return `${c.category} ${dir} by ₹${Math.abs(c.change_amount).toLocaleString('en-IN')} (${Math.abs(c.change_pct)}%)`;
+      })
+      .join('; ');
+
+    const periodLabel = period === 'weekly'
+      ? `${ctx.current_week} vs. ${ctx.previous_week}`
+      : `${ctx.current_month} vs. ${ctx.previous_month}`;
+
+    const expDir = ctx.expense_change_pct > 0 ? 'increased' : ctx.expense_change_pct < 0 ? 'decreased' : 'stayed flat';
+
+    const prompt = `
+You are SpendWise AI, a helpful personal finance advisor for Indian users.
+A Python financial engine has precisely computed the following ${period} financial report. Your job is to explain it in clear, natural language.
+
+${period.charAt(0).toUpperCase() + period.slice(1)} Report: ${periodLabel}
+
+Key Verified Numbers:
+- Total Expenses (current): ₹${(ctx.curr_expense || 0).toLocaleString('en-IN')}
+- Total Expenses (previous): ₹${(ctx.prev_expense || 0).toLocaleString('en-IN')}
+- Expense Change: ${Math.abs(ctx.expense_change_pct || 0)}% ${expDir}
+- Total Income: ₹${(ctx.curr_income || 0).toLocaleString('en-IN')}
+- Savings: ₹${(ctx.curr_savings || 0).toLocaleString('en-IN')} (${ctx.savings_pct || 0}% of income)
+- Top spending category: ${ctx.top_category || 'N/A'}
+- Category changes: ${catChanges || 'No significant changes'}
+${ctx.projected_month_end ? `- Projected month-end spending: ₹${ctx.projected_month_end.toLocaleString('en-IN')}` : ''}
+
+Write a concise 3-4 sentence natural-language report summary.
+- Start with the overall spending change: e.g. "Your spending increased by 12% compared to last month..."
+- Mention the top 2 categories that drove the change.
+- End with one specific, actionable recommendation.
+- Use ₹ and en-IN number format. No markdown headers. Keep it under 100 words.
+`.trim();
+
+    let llmSummary = null;
+    try {
+      llmSummary = await callGemini(prompt);
+    } catch (llmErr) {
+      logger.warn('[FinancialReport] LLM call failed', { error: llmErr.message });
+    }
+
+    // Deterministic fallback
+    if (!llmSummary) {
+      const changeWord = (ctx.expense_change_pct || 0) > 0 ? 'increased' : 'decreased';
+      llmSummary = `Your spending ${changeWord} by ${Math.abs(ctx.expense_change_pct || 0)}% compared to the previous ${period === 'weekly' ? 'week' : 'month'}. ` +
+        `Your top category is ${ctx.top_category || 'general expenses'}. ` +
+        (catChanges ? `Notable changes: ${catChanges}.` : '');
+    }
+
+    return res.json({
+      ...pythonReport,
+      llm_summary: llmSummary,
+    });
+  } catch (error) {
+    logger.error('Error generating financial report', { error: error.message });
+    res.status(500).json({ message: 'Failed to generate financial report' });
+  }
+};
+
 module.exports = {
   getSpendingAnalytics,
   chatAssistant,
   evaluatePurchase,
   getBudgetRecommendations,
+  getFinancialReport,
 };

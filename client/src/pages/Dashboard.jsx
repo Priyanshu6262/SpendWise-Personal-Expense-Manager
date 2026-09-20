@@ -22,6 +22,7 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import Spinner from '../components/Spinner';
 import DashboardCharts from '../components/dashboard/DashboardCharts';
 import BudgetRecommendations from '../components/dashboard/BudgetRecommendations';
+import FinancialReport from '../components/dashboard/FinancialReport';
 
 const Dashboard = () => {
   const { transactions, loading, fetchTransactions, deleteTransaction } = useTransactions();
@@ -394,6 +395,9 @@ const Dashboard = () => {
 
       {/* Visual Analytics & Charts Section */}
       <DashboardCharts transactions={transactions} />
+
+      {/* Automatic Financial Reports (Weekly & Monthly) */}
+      <FinancialReport />
 
       {/* AI Budget Recommendations Section */}
       <BudgetRecommendations />
