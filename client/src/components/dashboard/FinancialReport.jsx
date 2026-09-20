@@ -191,9 +191,6 @@ const FinancialReport = () => {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <h2 className="text-lg sm:text-xl font-bold text-[#F8FAFC]">Financial Reports</h2>
-          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30 flex items-center gap-1">
-            <Sparkles className="w-3 h-3" /> AI + Python
-          </span>
         </div>
         <p className="text-xs text-[#94A3B8]">Verified analytics with AI-generated natural-language summaries</p>
       </div>
