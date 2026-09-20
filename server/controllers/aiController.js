@@ -39,7 +39,7 @@ async function callPythonService(endpoint, body, timeoutMs = 5000) {
 }
 
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
-const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+const MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-pro'];
 
 /**
  * Helper to query Gemini with model fallback
@@ -661,10 +661,144 @@ Write a concise 3-4 sentence natural-language report summary.
   }
 };
 
+/**
+ * @desc    AI Bill & Receipt Scanner (Google Gemini Vision)
+ * @route   POST /api/ai/scan-bill
+ * @access  Private
+ * @body    { image: string (base64 or data URL), mimeType?: string }
+ */
+const scanBillReceipt = async (req, res) => {
+  try {
+    let { image, mimeType } = req.body;
+
+    if (!image) {
+      return res.status(400).json({ message: 'No bill image provided. Please upload or capture an image.' });
+    }
+
+    if (!genAI) {
+      return res.status(503).json({ message: 'Gemini AI is not configured on the server (missing GEMINI_API_KEY).' });
+    }
+
+    // Handle data URL (e.g. "data:image/jpeg;base64,...")
+    let base64Data = image;
+    if (image.includes(';base64,')) {
+      const parts = image.split(';base64,');
+      if (!mimeType) {
+        const mimeMatch = parts[0].match(/data:(.*?)$/);
+        if (mimeMatch) mimeType = mimeMatch[1];
+      }
+      base64Data = parts[1];
+    } else if (image.startsWith('data:')) {
+      const commaIdx = image.indexOf(',');
+      if (commaIdx !== -1) {
+        base64Data = image.slice(commaIdx + 1);
+      }
+    }
+
+    mimeType = mimeType || 'image/jpeg';
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const prompt = `
+You are an expert OCR and financial document parser for the SpendWise expense management application.
+Analyze this image of a bill, receipt, invoice, or ticket, and extract the transaction details.
+
+Valid expense categories: "Food", "Shopping", "Bills", "Travel", "Entertainment", "Other"
+
+Return ONLY a single valid JSON object with the following schema, and NO additional text, explanations, or markdown code blocks:
+{
+  "title": "Merchant, business name, or bill purpose (e.g. Starbucks, Swiggy, Electricity Bill, Amazon)",
+  "amount": <positive number, representing total amount paid or billed, e.g. 450.50>,
+  "type": "Expense",
+  "category": "Food" | "Shopping" | "Bills" | "Travel" | "Entertainment" | "Other",
+  "date": "YYYY-MM-DD",
+  "notes": "Brief summary of purchased items, bill/receipt number, or payment method"
+}
+
+Rules:
+1. If the date is not clearly printed on the receipt or ambiguous, use today's date (${todayStr}).
+2. Ensure "amount" is a raw numeric float (do not include currency symbols like ₹, $, commas).
+3. If it looks like an income/salary/credit receipt, "type" can be "Income". Otherwise default to "Expense".
+4. Pick the closest matching category from the valid categories above.
+5. If the merchant name is unclear, provide a descriptive title like "Receipt Expense" or the item type.
+`.trim();
+
+    const imagePart = {
+      inlineData: {
+        data: base64Data,
+        mimeType: mimeType,
+      },
+    };
+
+    let responseText = null;
+    let lastError = null;
+
+    // Try models in order
+    for (const modelName of MODELS) {
+      try {
+        logger.info(`[ScanBillAI] Attempting OCR with model: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent([prompt, imagePart]);
+        responseText = result.response.text();
+        if (responseText) {
+          logger.info(`[ScanBillAI] Success with model: ${modelName}`);
+          break;
+        }
+      } catch (err) {
+        lastError = err;
+        logger.warn(`[ScanBillAI] Model ${modelName} failed: ${err.message.slice(0, 120)}`);
+      }
+    }
+
+    if (!responseText) {
+      throw lastError || new Error('Could not analyze the bill image with Gemini AI.');
+    }
+
+    // Clean JSON response (strip markdown fences if any)
+    const cleaned = responseText
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```\s*$/i, '')
+      .trim();
+
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('AI did not return a valid structured bill object.');
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    // Validation & defaults
+    const validCategories = ['Food', 'Shopping', 'Bills', 'Travel', 'Entertainment', 'Other', 'Salary', 'Freelance', 'Business'];
+    const matchedCategory = validCategories.find(c => c.toLowerCase() === (parsed.category || '').toLowerCase()) || 'Bills';
+
+    const extractedData = {
+      title: (parsed.title || 'Scanned Bill').toString().slice(0, 100),
+      amount: parseFloat(parsed.amount) > 0 ? parseFloat(parsed.amount) : 0,
+      type: parsed.type === 'Income' ? 'Income' : 'Expense',
+      category: matchedCategory,
+      date: parsed.date && !isNaN(new Date(parsed.date).getTime())
+        ? new Date(parsed.date).toISOString().split('T')[0]
+        : todayStr,
+      notes: (parsed.notes || '').toString().slice(0, 500),
+    };
+
+    return res.json({
+      success: true,
+      data: extractedData,
+    });
+  } catch (error) {
+    logger.error('Error scanning bill receipt', { error: error.message });
+    return res.status(500).json({
+      message: error.message || 'Failed to scan bill receipt. Please try another photo or enter manually.',
+    });
+  }
+};
+
 module.exports = {
   getSpendingAnalytics,
   chatAssistant,
   evaluatePurchase,
   getBudgetRecommendations,
   getFinancialReport,
+  scanBillReceipt,
 };

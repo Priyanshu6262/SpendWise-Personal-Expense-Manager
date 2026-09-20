@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTransactions } from '../context/TransactionContext';
 import {
   Plus,
+  Camera,
   ArrowUpRight,
   ArrowDownRight,
   Wallet,
@@ -18,6 +19,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import TransactionForm from '../components/TransactionForm';
+import BillScanModal from '../components/BillScanModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import Spinner from '../components/Spinner';
 import DashboardCharts from '../components/dashboard/DashboardCharts';
@@ -27,6 +29,7 @@ import FinancialReport from '../components/dashboard/FinancialReport';
 const Dashboard = () => {
   const { transactions, loading, fetchTransactions, deleteTransaction } = useTransactions();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deletingTransactionId, setDeletingTransactionId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -114,7 +117,7 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={() => fetchTransactions()}
             className="inline-flex items-center justify-center font-medium text-xs px-3.5 py-2.5 rounded-lg bg-[#0F172A] border border-[#263449] text-[#F8FAFC] hover:bg-[#111C2E] hover:border-[#10B981]/40 transition-all focus:outline-none focus:ring-2 focus:ring-[#10B981]/40 disabled:opacity-50"
@@ -123,6 +126,14 @@ const Dashboard = () => {
           >
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 text-[#94A3B8] ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
+          <button
+            onClick={() => setIsScanModalOpen(true)}
+            className="inline-flex items-center justify-center font-semibold text-xs px-3.5 py-2.5 rounded-lg bg-[#0F172A] border border-[#10B981]/50 text-[#10B981] hover:bg-[#10B981]/10 hover:border-[#10B981] transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-[#10B981]/40"
+            title="Scan bill or receipt with AI"
+          >
+            <Camera className="w-4 h-4 mr-1.5" />
+            Scan Bill
           </button>
           <button
             onClick={() => setIsFormOpen(true)}
@@ -407,6 +418,12 @@ const Dashboard = () => {
         isOpen={isFormOpen}
         onClose={handleCloseForm}
         transaction={editingTransaction}
+      />
+
+      {/* AI Bill / Receipt Scan Modal */}
+      <BillScanModal
+        isOpen={isScanModalOpen}
+        onClose={() => setIsScanModalOpen(false)}
       />
 
       {/* Deletion Confirmation Modal */}
