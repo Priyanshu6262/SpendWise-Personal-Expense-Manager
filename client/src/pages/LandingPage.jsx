@@ -101,36 +101,36 @@ const LandingPage = ({ initialAuthMode = 'login' }) => {
     email: !loginData.email
       ? 'Email is required'
       : !isValidEmail(loginData.email)
-      ? 'Enter a valid email address'
-      : '',
+        ? 'Enter a valid email address'
+        : '',
     password: !loginData.password
       ? 'Password is required'
       : loginData.password.length < 6
-      ? 'Password must be at least 6 characters'
-      : '',
+        ? 'Password must be at least 6 characters'
+        : '',
   };
 
   const registerErrors = {
     name: !registerData.name
       ? 'Full name is required'
       : registerData.name.trim().length < 2
-      ? 'Name must be at least 2 characters'
-      : '',
+        ? 'Name must be at least 2 characters'
+        : '',
     email: !registerData.email
       ? 'Email is required'
       : !isValidEmail(registerData.email)
-      ? 'Enter a valid email address'
-      : '',
+        ? 'Enter a valid email address'
+        : '',
     password: !registerData.password
       ? 'Password is required'
       : registerData.password.length < 6
-      ? 'Password must be at least 6 characters'
-      : '',
+        ? 'Password must be at least 6 characters'
+        : '',
     confirmPassword: !registerData.confirmPassword
       ? 'Please confirm your password'
       : registerData.confirmPassword !== registerData.password
-      ? 'Passwords do not match'
-      : '',
+        ? 'Passwords do not match'
+        : '',
   };
 
   const pwStrength = getPasswordStrength(registerData.password);
@@ -312,342 +312,13 @@ const LandingPage = ({ initialAuthMode = 'login' }) => {
               </div>
             </div>
 
-            {/* ─── RIGHT SIDE: Simple Text-Style Login & Register ─── */}
-            <div className="lg:col-span-5">
-              <div className="bg-[#111C2E] rounded-2xl border border-[#263449] p-7 shadow-xl">
-
-                {/* Already Authenticated State */}
-                {isAuthenticated ? (
-                  <div className="text-center py-4 space-y-5">
-                    <div className="w-14 h-14 rounded-full bg-[#10B981]/10 text-[#10B981] mx-auto flex items-center justify-center font-bold text-lg border border-[#10B981]/30">
-                      {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-[#F8FAFC]">Welcome back, {user?.name || 'User'}</h3>
-                      <p className="text-xs text-[#64748B] mt-1">You're signed in to SpendWise.</p>
-                    </div>
-                    <div className="space-y-2.5 pt-1">
-                      <Link
-                        to="/dashboard"
-                        className="block w-full py-2.5 px-4 rounded-lg bg-[#10B981] hover:bg-[#059669] text-white font-medium text-sm text-center transition"
-                      >
-                        Go to Dashboard
-                      </Link>
-                      <Link
-                        to="/transactions"
-                        className="block w-full py-2 px-4 rounded-lg bg-[#0F172A] hover:bg-[#0B1220] border border-[#263449] text-[#94A3B8] hover:text-[#F8FAFC] font-medium text-sm text-center transition"
-                      >
-                        View Transactions
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
-                  /* Clean, Simple Text-Style Form */
-                  <div>
-                    {/* Animated tab switcher */}
-                    <div className="flex items-center justify-between border-b border-[#263449] pb-3 mb-6">
-                      <div className="flex items-center gap-5 text-sm font-semibold">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAuthMode('login');
-                            setAuthError('');
-                          }}
-                          className={`pb-1 transition-all duration-300 ${
-                            authMode === 'login'
-                              ? 'text-[#10B981] border-b-2 border-[#10B981] scale-105'
-                              : 'text-[#64748B] hover:text-[#94A3B8]'
-                          }`}
-                        >
-                          Sign In
-                        </button>
-                        <span className="text-[#263449]">|</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAuthMode('register');
-                            setAuthError('');
-                          }}
-                          className={`pb-1 transition-all duration-300 ${
-                            authMode === 'register'
-                              ? 'text-[#10B981] border-b-2 border-[#10B981] scale-105'
-                              : 'text-[#64748B] hover:text-[#94A3B8]'
-                          }`}
-                        >
-                          Register
-                        </button>
-                      </div>
-
-                      <span className="text-[11px] text-[#64748B]">
-                        {authMode === 'login' ? 'Access account' : 'New account'}
-                      </span>
-                    </div>
-
-                    {/* Error message */}
-                    {authError && (
-                      <div className="mb-4 p-2.5 rounded-lg bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] text-xs font-medium flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                        <span>{authError}</span>
-                      </div>
-                    )}
-
-                    {/* ── Animated form container ── */}
-                    <div
-                      key={authMode}
-                      style={{ animation: 'authSlideIn 0.35s cubic-bezier(0.22,1,0.36,1) both' }}
-                      className="min-h-[330px] flex flex-col"
-                    >
-
-                    {/* ══════════════ SIGN IN FORM ══════════════ */}
-                    {authMode === 'login' && (
-                      <form onSubmit={handleLoginSubmit} className="space-y-3">
-
-                        {/* Email */}
-                        <div>
-                          <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Email</label>
-                          <input
-                            type="email"
-                            value={loginData.email}
-                            onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                            onBlur={() => setLoginTouched((p) => ({ ...p, email: true }))}
-                            placeholder="you@example.com"
-                            className={`w-full px-3.5 py-2.5 bg-[#0F172A] border rounded-lg text-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:ring-1 transition ${
-                              loginTouched.email && loginErrors.email
-                                ? 'border-[#EF4444] focus:border-[#EF4444] focus:ring-[#EF4444]/20'
-                                : loginTouched.email && !loginErrors.email
-                                ? 'border-[#10B981] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                                : 'border-[#263449] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                            }`}
-                            disabled={authLoading}
-                          />
-                          {loginTouched.email && loginErrors.email && (
-                            <p className="mt-1 text-[11px] text-[#EF4444] flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" />{loginErrors.email}
-                            </p>
-                          )}
-                          {loginTouched.email && !loginErrors.email && (
-                            <p className="mt-1 text-[11px] text-[#10B981] flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" />Looks good!
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Password */}
-                        <div>
-                          <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Password</label>
-                          <div className="relative">
-                            <input
-                              type={showPassword ? 'text' : 'password'}
-                              value={loginData.password}
-                              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                              onBlur={() => setLoginTouched((p) => ({ ...p, password: true }))}
-                              placeholder="••••••••"
-                              className={`w-full px-3.5 py-2.5 pr-10 bg-[#0F172A] border rounded-lg text-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:ring-1 transition ${
-                                loginTouched.password && loginErrors.password
-                                  ? 'border-[#EF4444] focus:border-[#EF4444] focus:ring-[#EF4444]/20'
-                                  : loginTouched.password && !loginErrors.password
-                                  ? 'border-[#10B981] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                                  : 'border-[#263449] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                              }`}
-                              disabled={authLoading}
-                            />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#94A3B8] transition">
-                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                          {loginTouched.password && loginErrors.password && (
-                            <p className="mt-1 text-[11px] text-[#EF4444] flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" />{loginErrors.password}
-                            </p>
-                          )}
-                        </div>
-
-                        <button type="submit" disabled={authLoading}
-                          className="w-full py-2.5 px-4 rounded-lg bg-[#10B981] hover:bg-[#059669] text-white font-semibold text-sm transition disabled:opacity-50 disabled:pointer-events-none">
-                          {authLoading ? <Spinner size="sm" color="white" text="Signing in..." /> : 'Sign In'}
-                        </button>
-                      </form>
-                    )}
-
-                    {/* ══════════════ REGISTER FORM ══════════════ */}
-                    {authMode === 'register' && (
-                      <form onSubmit={handleRegisterSubmit} className="space-y-3">
-
-                        {/* Full Name */}
-                        <div>
-                          <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Full Name</label>
-                          <input
-                            type="text"
-                            value={registerData.name}
-                            onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
-                            onBlur={() => setRegisterTouched((p) => ({ ...p, name: true }))}
-                            placeholder="John Doe"
-                            className={`w-full px-3.5 py-2.5 bg-[#0F172A] border rounded-lg text-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:ring-1 transition ${
-                              registerTouched.name && registerErrors.name
-                                ? 'border-[#EF4444] focus:border-[#EF4444] focus:ring-[#EF4444]/20'
-                                : registerTouched.name && !registerErrors.name
-                                ? 'border-[#10B981] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                                : 'border-[#263449] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                            }`}
-                            disabled={authLoading}
-                          />
-                          {registerTouched.name && registerErrors.name && (
-                            <p className="mt-1 text-[11px] text-[#EF4444] flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" />{registerErrors.name}
-                            </p>
-                          )}
-                          {registerTouched.name && !registerErrors.name && (
-                            <p className="mt-1 text-[11px] text-[#10B981] flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" />Looks good!
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Email */}
-                        <div>
-                          <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Email</label>
-                          <input
-                            type="email"
-                            value={registerData.email}
-                            onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                            onBlur={() => setRegisterTouched((p) => ({ ...p, email: true }))}
-                            placeholder="john@example.com"
-                            className={`w-full px-3.5 py-2.5 bg-[#0F172A] border rounded-lg text-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:ring-1 transition ${
-                              registerTouched.email && registerErrors.email
-                                ? 'border-[#EF4444] focus:border-[#EF4444] focus:ring-[#EF4444]/20'
-                                : registerTouched.email && !registerErrors.email
-                                ? 'border-[#10B981] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                                : 'border-[#263449] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                            }`}
-                            disabled={authLoading}
-                          />
-                          {registerTouched.email && registerErrors.email && (
-                            <p className="mt-1 text-[11px] text-[#EF4444] flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" />{registerErrors.email}
-                            </p>
-                          )}
-                          {registerTouched.email && !registerErrors.email && (
-                            <p className="mt-1 text-[11px] text-[#10B981] flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" />Valid email!
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Password */}
-                        <div>
-                          <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Password</label>
-                          <div className="relative">
-                            <input
-                              type={showPassword ? 'text' : 'password'}
-                              value={registerData.password}
-                              onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                              onBlur={() => setRegisterTouched((p) => ({ ...p, password: true }))}
-                              placeholder="At least 6 characters"
-                              className={`w-full px-3.5 py-2.5 pr-10 bg-[#0F172A] border rounded-lg text-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:ring-1 transition ${
-                                registerTouched.password && registerErrors.password
-                                  ? 'border-[#EF4444] focus:border-[#EF4444] focus:ring-[#EF4444]/20'
-                                  : registerTouched.password && !registerErrors.password
-                                  ? 'border-[#10B981] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                                  : 'border-[#263449] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                              }`}
-                              disabled={authLoading}
-                            />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#94A3B8] transition">
-                              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                          {/* Password strength bar */}
-                          {registerData.password && (
-                            <div className="mt-2 space-y-1">
-                              <div className="flex gap-1">
-                                {[1,2,3,4].map((seg) => (
-                                  <div key={seg} className="h-1 flex-1 rounded-full transition-all duration-300"
-                                    style={{ backgroundColor: pwStrength.score >= seg ? pwStrength.color : '#263449' }} />
-                                ))}
-                              </div>
-                              <p className="text-[11px] font-medium" style={{ color: pwStrength.color }}>
-                                {pwStrength.label} password
-                                {pwStrength.score < 3 && <span className="text-[#64748B] font-normal"> — add uppercase, numbers or symbols</span>}
-                              </p>
-                            </div>
-                          )}
-                          {registerTouched.password && registerErrors.password && (
-                            <p className="mt-1 text-[11px] text-[#EF4444] flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" />{registerErrors.password}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Confirm Password */}
-                        <div>
-                          <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Confirm Password</label>
-                          <div className="relative">
-                            <input
-                              type={showConfirmPassword ? 'text' : 'password'}
-                              value={registerData.confirmPassword}
-                              onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
-                              onBlur={() => setRegisterTouched((p) => ({ ...p, confirmPassword: true }))}
-                              placeholder="Re-enter password"
-                              className={`w-full px-3.5 py-2.5 pr-10 bg-[#0F172A] border rounded-lg text-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:ring-1 transition ${
-                                registerTouched.confirmPassword && registerErrors.confirmPassword
-                                  ? 'border-[#EF4444] focus:border-[#EF4444] focus:ring-[#EF4444]/20'
-                                  : registerTouched.confirmPassword && !registerErrors.confirmPassword
-                                  ? 'border-[#10B981] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                                  : 'border-[#263449] focus:border-[#10B981] focus:ring-[#10B981]/20'
-                              }`}
-                              disabled={authLoading}
-                            />
-                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#94A3B8] transition">
-                              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                          {registerTouched.confirmPassword && registerErrors.confirmPassword && (
-                            <p className="mt-1 text-[11px] text-[#EF4444] flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" />{registerErrors.confirmPassword}
-                            </p>
-                          )}
-                          {registerTouched.confirmPassword && !registerErrors.confirmPassword && registerData.confirmPassword && (
-                            <p className="mt-1 text-[11px] text-[#10B981] flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" />Passwords match!
-                            </p>
-                          )}
-                        </div>
-
-                        <button type="submit" disabled={authLoading}
-                          className="w-full py-2.5 px-4 rounded-lg bg-[#10B981] hover:bg-[#059669] text-white font-semibold text-sm transition disabled:opacity-50 disabled:pointer-events-none">
-                          {authLoading ? <Spinner size="sm" color="white" text="Creating account..." /> : 'Create Account'}
-                        </button>
-                      </form>
-                    )}
-
-                    </div>{/* end animated container */}
-
-                    <div className="mt-4 pt-4 border-t border-[#263449] text-center">
-                      {authMode === 'register' ? (
-                        <p className="text-xs text-[#64748B]">
-                          Already have an account?{' '}
-                          <button type="button" onClick={() => switchMode('login')}
-                            className="text-[#10B981] hover:text-[#059669] font-semibold transition">
-                            Sign in
-                          </button>
-                        </p>
-                      ) : (
-                        <p className="text-xs text-[#64748B]">
-                          Don't have an account?{' '}
-                          <button type="button" onClick={() => switchMode('register')}
-                            className="text-[#10B981] hover:text-[#059669] font-semibold transition">
-                            Register for free
-                          </button>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-              </div>
+            {/* ─── RIGHT SIDE: Hero Image ─── */}
+            <div className="lg:col-span-5 flex items-center justify-center">
+              <img
+                src="/hero img.png"
+                alt="SpendWise App Preview"
+                className="w-full max-w-2xl object-contain drop-shadow-2xl"
+              />
             </div>
 
           </div>
@@ -671,7 +342,7 @@ const LandingPage = ({ initialAuthMode = 'login' }) => {
 
           {/* 8 Features Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            
+
             {/* 1. Transaction Ledger */}
             <div className="group p-6 rounded-2xl bg-[#111C2E] border border-[#263449] hover:border-[#10B981]/50 hover:shadow-xl hover:shadow-[#10B981]/5 transition-all duration-200 flex flex-col justify-between">
               <div>
@@ -967,11 +638,10 @@ const LandingPage = ({ initialAuthMode = 'login' }) => {
           <div className="flex flex-wrap gap-2.5 p-1.5 rounded-xl bg-[#111C2E] border border-[#263449] max-w-2xl mb-10">
             <button
               onClick={() => setActiveGuideTab('how')}
-              className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-xs font-bold transition-all ${
-                activeGuideTab === 'how'
+              className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-xs font-bold transition-all ${activeGuideTab === 'how'
                   ? 'bg-[#10B981] text-white shadow-md shadow-[#10B981]/20'
                   : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#0F172A]'
-              }`}
+                }`}
             >
               <Clock className="w-3.5 h-3.5" />
               <span>1. How Users Use It</span>
@@ -979,11 +649,10 @@ const LandingPage = ({ initialAuthMode = 'login' }) => {
 
             <button
               onClick={() => setActiveGuideTab('why')}
-              className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-xs font-bold transition-all ${
-                activeGuideTab === 'why'
+              className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-xs font-bold transition-all ${activeGuideTab === 'why'
                   ? 'bg-[#6366F1] text-white shadow-md shadow-[#6366F1]/20'
                   : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#0F172A]'
-              }`}
+                }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>2. Why Use It</span>
@@ -991,11 +660,10 @@ const LandingPage = ({ initialAuthMode = 'login' }) => {
 
             <button
               onClick={() => setActiveGuideTab('where')}
-              className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-xs font-bold transition-all ${
-                activeGuideTab === 'where'
+              className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-xs font-bold transition-all ${activeGuideTab === 'where'
                   ? 'bg-[#F59E0B] text-white shadow-md shadow-[#F59E0B]/20'
                   : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#0F172A]'
-              }`}
+                }`}
             >
               <Users className="w-3.5 h-3.5" />
               <span>3. Where &amp; Who Uses It</span>
@@ -1006,7 +674,7 @@ const LandingPage = ({ initialAuthMode = 'login' }) => {
           {activeGuideTab === 'how' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                
+
                 {/* Step 1 */}
                 <div className="relative p-6 rounded-2xl bg-[#111C2E] border border-[#263449] hover:border-[#10B981]/40 transition flex flex-col justify-between">
                   <div>
@@ -1110,10 +778,10 @@ const LandingPage = ({ initialAuthMode = 'login' }) => {
           {/* TAB 2: WHY USERS USE THIS WEBSITE */}
           {activeGuideTab === 'why' && (
             <div className="space-y-8">
-              
+
               {/* Comparison Matrix: Old Way vs SpendWise Way */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
+
                 {/* The Old Way */}
                 <div className="p-6 rounded-2xl bg-[#111C2E]/60 border border-[#EF4444]/25">
                   <div className="flex items-center gap-2 mb-4">
